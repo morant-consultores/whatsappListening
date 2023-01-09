@@ -1,0 +1,13 @@
+Package: whatsappListening
+Title: Gestiones whatsapp
+Version: 0.0.0.9000
+Authors@R: person('Emilio', 'Morones', email = 'emorones@morant.com.mx', role = c('cre', 'aut'))
+Description: Tablero para administrar gesitones y escucha de grupos de whatsapp
+License: MIT + file LICENSE
+Imports: 
+    config (>= 0.3.1),
+    golem (>= 0.3.5.9001),
+    shiny (>= 1.7.4)
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
