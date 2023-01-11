@@ -25,7 +25,8 @@ mod_solicitudes_server <- function(id){
       tbl(pool, "K_ASISTENCIA") %>%
         left_join(tbl(pool, "K_DIRECTORIO"), by = c("ASI_DIR_ID"="DIR_ID")) %>%
         left_join(tbl(pool, "K_EVENTO"), by = c("ASI_EVE_ID"="EVE_ID")) %>%
-        select(ASI_ID, DIR_NOMBRE, DIR_APATERNO, DIR_SEXO, DIR_NUMERO_CEL, DIR_FECHA_CREACION, ASI_CONTENIDO, EVE_NOMBRE) %>%
+        select(ASI_ID, DIR_NOMBRE, DIR_APATERNO, DIR_SEXO, DIR_NUMERO_CEL,
+               DIR_FECHA_CREACION, ASI_CONTENIDO, EVE_NOMBRE) %>%
         collect() %>%
         mutate(boton = input_btns(inputId = ns("whatsapp"), ASI_ID, tooltip = "whatsapp", icon = icon("whatsapp"), status = "default", label = ""))
     }, selection = 'none',rownames = FALSE, extensions = 'Responsive',

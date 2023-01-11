@@ -21,11 +21,12 @@ attachment::att_amend_desc()
 ## Add modules ----
 ## Create a module infrastructure in R/
 golem::add_module(name = "solicitudes", with_test = TRUE) # Name of the module
-golem::add_module(name = "name_of_module2", with_test = TRUE) # Name of the module
+golem::add_module(name = "analisis_whats", with_test = TRUE) # Name of the module
 
 ## Add helper functions ----
 ## Creates fct_* and utils_*
 golem::add_fct("pool", with_test = F)
+golem::add_fct("whatsapp", with_test = F)
 golem::add_utils("inputBtn", with_test = TRUE)
 
 ## External resources

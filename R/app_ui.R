@@ -17,14 +17,21 @@ app_ui <- function(request) {
           menuItem("Solicitudes",
                    tabName = "solicitudes",
                    icon = icon("dashboard")
-          )
+          ),
+          menuItem("Análisis whatsapp",
+                   tabName = "whatsapp",
+                   icon = icon("whatsapp")
+                   )
         )
       ),
       body = dashboardBody(
         tabItems(
           tabItem(tabName = "solicitudes",
                   mod_solicitudes_ui("solicitudes_1")
-          )
+          ),
+          tabItem(tabName = "whatsapp",
+                  mod_analisis_whats_ui("analisis_whats_1")
+                  )
         )
       )
     )
