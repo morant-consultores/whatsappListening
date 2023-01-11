@@ -2,15 +2,31 @@
 #'
 #' @param request Internal parameter for `{shiny}`.
 #'     DO NOT REMOVE.
-#' @import shiny
+#' @import shiny shinydashboard
 #' @noRd
 app_ui <- function(request) {
   tagList(
     # Leave this function for adding external resources
     golem_add_external_resources(),
     # Your application UI logic
-    fluidPage(
-      h1("whatsappListening")
+    dashboardPage(
+      header = dashboardHeader(title = "Gestión whatsapp"),
+      sidebar = dashboardSidebar(#expand_on_hover = F,
+        # Sidebar #####
+        sidebarMenu(
+          menuItem("Solicitudes",
+                   tabName = "solicitudes",
+                   icon = icon("dashboard")
+          )
+        )
+      ),
+      body = dashboardBody(
+        tabItems(
+          tabItem(tabName = "solicitudes",
+                  mod_solicitudes_ui("solicitudes_1")
+          )
+        )
+      )
     )
   )
 }
