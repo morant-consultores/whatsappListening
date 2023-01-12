@@ -28,8 +28,14 @@ mod_solicitudes_server <- function(id){
         select(ASI_ID, DIR_NOMBRE, DIR_APATERNO, DIR_SEXO, DIR_NUMERO_CEL,
                DIR_FECHA_CREACION, ASI_CONTENIDO, EVE_NOMBRE) %>%
         collect() %>%
-        mutate(boton = input_btns(inputId = ns("whatsapp"), ASI_ID, tooltip = "whatsapp", icon = icon("whatsapp"), status = "default", label = ""))
-    }, selection = 'none',rownames = FALSE, extensions = 'Responsive',
+        janitor::clean_names() %>%
+        mutate(boton = input_btns(inputId = ns("whatsapp"),
+                                  dir_numero_cel,
+                                  tooltip = "whatsapp",
+                                  icon = icon("whatsapp"),
+                                  status = "default", label = ""))
+    },
+    selection = 'none',rownames = FALSE, extensions = 'Responsive',
     options = list(language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json'),
                    drawCallback = JS("function() {Shiny.bindAll(this.api().table().node());}"),
                    lengthMenu = c(5, 10, 25, 50, 100), pageLength = 5
@@ -38,8 +44,8 @@ mod_solicitudes_server <- function(id){
 
 
 
-    observe({
-      print(input$whatsapp)
+    observeEvent(input$whatsapp, {
+      browseURL(glue::glue("https://api.whatsapp.com/send/?phone={isolate(input$whatsapp)}&text&type=phone_number&app_absent=0"))
       })
 
   })
