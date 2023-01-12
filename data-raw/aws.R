@@ -15,13 +15,5 @@ pool <- dbPool(
   PWD = "empread",
   Port = 1433
 )
-bd <- tbl(pool, "K_ESCUCHA") %>% collect()
-bd %>% view
-
-dbListTables(pool) %>% .[1:30]
-
-
-
-
 
 usethis::use_data(aws, overwrite = TRUE)
