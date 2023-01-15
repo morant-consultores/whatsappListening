@@ -1,20 +1,44 @@
 Package: whatsappListening
 Title: Gestiones whatsapp
 Version: 0.0.0.9000
-Authors@R: person('Emilio', 'Morones', email = 'emorones@morant.com.mx', role = c('cre', 'aut'))
-Description: Tablero para administrar gesitones y escucha de grupos de whatsapp
+Authors@R: 
+    person("Emilio", "Morones", , "emorones@morant.com.mx", role = c("cre", "aut"))
+Description: Tablero para administrar gesitones y escucha de grupos de
+    whatsapp
 License: MIT + file LICENSE
-Imports: 
-    config (>= 0.3.1),
-    golem (>= 0.3.5.9001),
-    shiny (>= 1.7.4)
-Encoding: UTF-8
-LazyData: true
-RoxygenNote: 7.2.3
-Suggests: 
-    spelling (>= 2.2),
-    testthat (>= 3.0.0)
-Config/testthat/edition: 3
-Language: en-US
 URL: https://github.com/morant-consultores/whatsappListening
 BugReports: https://github.com/morant-consultores/whatsappListening/issues
+Imports: 
+    config (>= 0.3.1),
+    dbplyr,
+    dplyr,
+    DT,
+    forcats,
+    ggplot2,
+    ggraph,
+    glue,
+    golem (>= 0.3.5.9001),
+    highcharter,
+    htmltools,
+    igraph,
+    janitor,
+    lubridate,
+    odbc,
+    pool,
+    purrr,
+    quanteda,
+    quanteda.textmodels,
+    quanteda.textplots,
+    quanteda.textstats,
+    rwhatsapp,
+    shiny (>= 1.7.4),
+    shinydashboard,
+    stringr,
+    tidyr
+Suggests: 
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Encoding: UTF-8
+Language: en-US
+LazyData: true
+RoxygenNote: 7.2.3
