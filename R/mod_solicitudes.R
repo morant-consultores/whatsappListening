@@ -5,7 +5,7 @@
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
 #' @noRd
-#' @import dplyr htmltools DT
+#' @import dplyr htmltools DT dbplyr
 #' @importFrom shiny NS tagList
 mod_solicitudes_ui <- function(id){
   ns <- NS(id)
