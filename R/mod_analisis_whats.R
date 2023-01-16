@@ -23,14 +23,15 @@ mod_analisis_whats_ui <- function(id){
                                             selected = ""))
                          ),
                          fluidRow(
-                           valueBoxOutput(ns("periodo"), width = 4),
-                           valueBoxOutput(ns("mensajes"), width = 4),
-                           valueBoxOutput(ns("persona"), width = 4)
+                           col_1(),
+                           valueBoxOutput(ns("periodo"), width = 5),
+                           valueBoxOutput(ns("mensajes"), width = 5),
+                           col_1()
                          ),
                          fluidRow(
                            col_6(
                              box(width = 12,
-                                 highchartOutput(ns("prom_hora"))
+                                 gt::gt_output(ns("top"))
                                  )
                            ),
                            col_6(
@@ -40,43 +41,48 @@ mod_analisis_whats_ui <- function(id){
                            )
                          ),
                          fluidRow(
-                           col_6(
+                           col_4(
+                             box(width = 12,
+                                 highchartOutput(ns("prom_hora"))
+                             )
+                           ),
+                           col_4(
                              box(width = 12,
                                  plotOutput(ns("semana_conteo"))
                                  )
                            ),
-                           col_6(
+                           col_4(
                              box(width = 12,
                                  highchartOutput(ns("flujo_mensajes"))
                                  )
                            )
                          )
-                )#,
-                # tabPanel(title = "Comparativa",
-                #          fluidRow(col_6(
-                #            h1("Comparativa de grupos")
-                #          )
-                #          ),
-                #          fluidRow(
-                #            col_1(),
-                #            col_10(
-                #              box(width = 12,
-                #                  plotOutput(ns("red_asociacion"))
-                #              )
-                #            ),
-                #            col_1()
-                #          ),
-                #          fluidRow(
-                #            column(6,
-                #                   box(width = 6,
-                #                       )
-                #                   ),
-                #            column(6,
-                #                   box(width = 6,
-                #                       )
-                #                   )
-                #            )
-                #          )
+                ),
+                tabPanel(title = "Comparativa",
+                         fluidRow(col_6(
+                           h1("Comparativa de grupos")
+                         )
+                         ),
+                         fluidRow(
+                           col_1(),
+                           col_10(
+                             box(width = 12,
+                                 plotOutput(ns("red_asociacion"))
+                             )
+                           ),
+                           col_1()
+                         ),
+                         fluidRow(
+                           column(6,
+                                  box(width = 6,
+                                      )
+                                  ),
+                           column(6,
+                                  box(width = 6,
+                                      )
+                                  )
+                           )
+                         )
     )
   )
 }
@@ -117,10 +123,27 @@ mod_analisis_whats_server <- function(id, bd){
       valueBox(value = a, subtitle = "Total de mensajes")
     })
 
-    output$persona <- renderValueBox({
-      a <- obtener_mayor_participacion(bd_w())
-
-      valueBox(value = a[1], subtitle = glue::glue("Fue quien más mensajes envió ({a[2]})"))
+    output$top <- gt::render_gt({
+      obtener_mayor_participacion(bd_w()) %>%
+        gt::gt() %>%
+        tab_header(
+          title = glue::glue("Top 10: Usuarios más activos")
+        ) %>%
+        opt_all_caps() %>%
+        tab_style(
+          style = cell_borders(
+            sides = "bottom", color = "transparent", weight = px(2)
+          ),
+          locations = cells_body(
+            columns = TRUE#,
+            #rows = nrow(bd_w())
+          )
+        )  %>%
+        tab_options(
+          table.width = px(500),
+          heading.title.font.weight = "bold",
+          heading.align = "left"
+        )
     })
 
     output$prom_hora <- renderHighchart({

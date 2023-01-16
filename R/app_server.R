@@ -13,7 +13,7 @@ app_server <- function(input, output, session) {
       janitor::clean_names() %>%
       filter(to == "5219671858096@c.us" & grepl("@g",x = from) & type == "chat") %>%
       select(-c(media, from_me, self)) %>%
-      mutate(time = lubridate::as_datetime(time),
+      mutate(time = lubridate::as_datetime(time, tz = "America/Mexico_City"),
              dia = format(floor_date(time, unit = "day"), format = "%d-%m-%y"),
              hora = format(floor_date(time, unit = "hour"), format = "%H:%M"),
              fecha_hora = paste(dia, hora, sep = " "),

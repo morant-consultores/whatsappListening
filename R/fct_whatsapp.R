@@ -27,16 +27,17 @@ contar_mensajes <- function(bd) {
 }
 
 obtener_mayor_participacion <- function(bd) {
-  a <- list(bd %>%
+   a <- list(nombre = bd %>%
     group_by(author, pushname) %>%
     count(sort = TRUE) %>%
-    head(1) %>%
+    head(10) %>%
     pull(pushname),
-    bd %>%
+    mensajes = bd %>%
       group_by(author, pushname) %>%
       count(sort = TRUE) %>%
-      head(1) %>%
-      pull(n))
+      head(10) %>%
+      pull(n)) %>%
+    bind_cols()
 
   return(a)
 }
