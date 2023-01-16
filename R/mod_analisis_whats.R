@@ -51,32 +51,32 @@ mod_analisis_whats_ui <- function(id){
                                  )
                            )
                          )
-                ),
-                tabPanel(title = "Comparativa",
-                         fluidRow(col_6(
-                           h1("Comparativa de grupos")
-                         )
-                         ),
-                         fluidRow(
-                           col_1(),
-                           col_10(
-                             box(width = 12,
-                                 plotOutput(ns("red_asociacion"))
-                             )
-                           ),
-                           col_1()
-                         ),
-                         fluidRow(
-                           column(6,
-                                  box(width = 6,
-                                      )
-                                  ),
-                           column(6,
-                                  box(width = 6,
-                                      )
-                                  )
-                           )
-                         )
+                )#,
+                # tabPanel(title = "Comparativa",
+                #          fluidRow(col_6(
+                #            h1("Comparativa de grupos")
+                #          )
+                #          ),
+                #          fluidRow(
+                #            col_1(),
+                #            col_10(
+                #              box(width = 12,
+                #                  plotOutput(ns("red_asociacion"))
+                #              )
+                #            ),
+                #            col_1()
+                #          ),
+                #          fluidRow(
+                #            column(6,
+                #                   box(width = 6,
+                #                       )
+                #                   ),
+                #            column(6,
+                #                   box(width = 6,
+                #                       )
+                #                   )
+                #            )
+                #          )
     )
   )
 }

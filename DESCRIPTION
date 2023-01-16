@@ -33,6 +33,7 @@ Imports:
     rwhatsapp,
     shiny (>= 1.7.4),
     shinydashboard,
+    shinyjs,
     stringr,
     tidyr
 Suggests: 

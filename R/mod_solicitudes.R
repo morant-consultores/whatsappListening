@@ -10,6 +10,8 @@
 mod_solicitudes_ui <- function(id){
   ns <- NS(id)
   tagList(
+    useShinyjs(),
+    extendShinyjs(text = js_code, functions = "browseURL"),
     DTOutput(ns("tabla"))
   )
 }
@@ -42,10 +44,8 @@ mod_solicitudes_server <- function(id){
     ),
     escape = F)
 
-
-
     observeEvent(input$whatsapp, {
-      browseURL(glue::glue("https://api.whatsapp.com/send/?phone={isolate(input$whatsapp)}&text&type=phone_number&app_absent=0"))
+      js$browseURL(glue::glue("https://api.whatsapp.com/send/?phone={isolate(input$whatsapp)}&text&type=phone_number&app_absent=0"))
       })
 
   })

@@ -27,6 +27,7 @@ golem::add_module(name = "analisis_whats", with_test = TRUE) # Name of the modul
 ## Creates fct_* and utils_*
 golem::add_fct("pool", with_test = F)
 golem::add_fct("whatsapp", with_test = F)
+golem::add_fct("solicitudes", with_test = F)
 golem::add_utils("inputBtn", with_test = TRUE)
 
 ## External resources

@@ -3,7 +3,7 @@
 #' @description A fct function
 #'
 #' @return The return value, if any, from executing the function.
-#' @import lubridate highcharter ggplot2 quanteda quanteda.textmodels quanteda.textstats quanteda.textplots igraph ggraph
+#' @import lubridate highcharter ggplot2 quanteda quanteda.textmodels quanteda.textstats quanteda.textplots igraph ggraph shinyjs
 #' @noRd
 
 Sys.setlocale(locale = "es_ES.UTF-8")
