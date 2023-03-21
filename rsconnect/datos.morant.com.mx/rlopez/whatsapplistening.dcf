@@ -1,0 +1,13 @@
+name: whatsapplistening
+title: whatsappListening
+username: rlopez
+account: rlopez
+server: datos.morant.com.mx
+hostUrl: https://datos.morant.com.mx/__api__
+appId: 28
+bundleId: 130
+url: https://datos.morant.com.mx/content/0d5bb8dd-b462-49c0-b4a7-fba6f83bb382/
+when: 1673659771.74067
+lastSyncTime: 1673659771.74068
+asMultiple: FALSE
+asStatic: FALSE

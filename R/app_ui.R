@@ -14,10 +14,10 @@ app_ui <- function(request) {
       sidebar = dashboardSidebar(#expand_on_hover = F,
         # Sidebar #####
         sidebarMenu(
-          menuItem("Solicitudes",
-                   tabName = "solicitudes",
-                   icon = icon("dashboard")
-          ),
+          # menuItem("Solicitudes",
+          #          tabName = "solicitudes",
+          #          icon = icon("dashboard")
+          # ),
           menuItem("Análisis whatsapp",
                    tabName = "whatsapp",
                    icon = icon("whatsapp")
