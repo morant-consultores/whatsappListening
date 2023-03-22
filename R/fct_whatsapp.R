@@ -69,22 +69,26 @@ contar_mensajes <- function(bd) {
     count()
 }
 
-calcular_mensajes_diarios <- function(bd) {
-  bd %>%
+calcular_mensajes_diarios <- function(bd, grupo = FALSE) {
+  bd %>% {
+    if(grupo == T) {
+      distinct(., dia, from)
+    } else{.}
+  } %>%
     count(dia) %>%
     mutate(dia = as.Date(dia, format = "%d-%m-%y")) %>%
     tidyr::complete(dia = seq(min(dia, na.rm = T), max(dia, na.rm = T), by = "day"), fill = list(n = 0)) %>%
     arrange(dia)
 }
 
-graficar_tendencia <- function(bd) {
+graficar_tendencia <- function(bd, titulo, yaxis) {
   highchart() %>%
     hc_chart(style = list(fontFamily = 'Poppins')) %>%
     hc_add_series(bd, hcaes(x = dia, y = n),
                   type = "spline",
                   name = "Mensajes escuchados",
                   color = "#A30039") %>%
-    hc_yAxis(title = list(text = "Mensajes recibidos"),
+    hc_yAxis(title = list(text = yaxis),
              labels = list(fontSize = '14px', width = '100px'),
              gridLineWidth = 0) %>%
     hc_xAxis(type = 'datetime',
@@ -93,7 +97,7 @@ graficar_tendencia <- function(bd) {
              labels= list(style = list(fontSize = '14px',
                                        autoRotationLimit = 80))) %>%
     hc_legend(enabled = FALSE) %>%
-    hc_title(text = "Mensajes escuchados por día")
+    hc_title(text = titulo)
 }
 
 obtener_mayor_participacion <- function(bd) {

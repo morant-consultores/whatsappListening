@@ -32,9 +32,12 @@ mod_analisis_whats_ui <- function(id){
                          ),
                          hr(),
                          fluidRow(
-                           column(12,
+                           column(6,
                                   highchartOutput(ns("linea_msg"))
-                           )
+                           ),
+                           column(6,
+                                  highchartOutput(ns("linea_gpo"))
+                                  )
                          ),
                          hr(),
                          fluidRow(
@@ -97,8 +100,17 @@ mod_analisis_whats_server <- function(id, bd){
 
       a <- calcular_mensajes_diarios(bd())
 
-      graficar_tendencia(a)
+      graficar_tendencia(a, titulo = "Mensajes enviados por día",
+                         yaxis = "Mensajes recibidos")
 
+    })
+
+    output$linea_gpo <- renderHighchart({
+
+      a <- calcular_mensajes_diarios(bd(), grupo = T)
+
+      graficar_tendencia(a, titulo = "Grupos con mensajes enviados por día",
+                         yaxis = "Grupos con mensajes enviados")
     })
 
     output$dist_grupo <- renderHighchart({
