@@ -21,7 +21,8 @@ app_server <- function(input, output, session) {
              fecha_hora = paste(dia, hora, sep = " "),
              dia_s = factor(substr(stringr::str_to_title(weekdays(time)), 1, 3),
                             levels = c("Lun", "Mar", "Mié", "Jue", "Vie", "Sab", "Dom")),
-             grupo_wa = as.integer(factor(from, levels = unique(from)))
+             grupo_wa = as.integer(factor(from, levels = unique(from))),
+             author = substr(author, 4, 13)
       ) %>%
       janitor::clean_names()
   })

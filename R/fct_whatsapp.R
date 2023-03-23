@@ -69,10 +69,10 @@ contar_mensajes <- function(bd) {
     count()
 }
 
-calcular_mensajes_diarios <- function(bd, grupo = FALSE) {
+calcular_var_diarios <- function(bd, grupo = FALSE, ...) {
   bd %>% {
     if(grupo == T) {
-      distinct(., dia, from)
+      distinct(., ...)
     } else{.}
   } %>%
     count(dia) %>%

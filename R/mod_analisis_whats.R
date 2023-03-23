@@ -3,7 +3,7 @@
 #' @description A shiny Module.
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
-#'
+#' @import leaflet forecast
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
@@ -28,7 +28,8 @@ mod_analisis_whats_ui <- function(id){
                              status = 'primary',
                              title = 'Progreso de escucha de grupos',
                              uiOutput(ns('progreso_grupo'))
-                           )
+                           ),
+                           valueBoxOutput(ns('fecha_meta'), width = 6)
                          ),
                          hr(),
                          fluidRow(
@@ -37,6 +38,12 @@ mod_analisis_whats_ui <- function(id){
                            ),
                            column(6,
                                   highchartOutput(ns("linea_gpo"))
+                                  )
+                         ),
+                         hr(),
+                         fluidRow(
+                           column(12,
+                                  leafletOutput(ns("mapa"))
                                   )
                          ),
                          hr(),
@@ -60,30 +67,19 @@ mod_analisis_whats_server <- function(id, bd){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    output$progreso_grupo <- renderUI({
-
-      a <- distinct(bd(), grupo_wa) %>%
-        tally() %>%
-        pull()
-
-      tags$div(
-        progressGroup("Grupos escuchados", value = a, max = 6000, color = 'red'),
-      )
-    })
-
     output$total_msg <- renderValueBox({
       a <- nrow(bd())
 
-      valueBox(value = a, subtitle = "Total de mensajes recibidos", icon = icon("comments"))
+      valueBox(value = scales::comma(a), subtitle = "Total de mensajes recibidos", icon = icon("comments"))
     })
 
     output$diario_msg <-  renderValueBox({
 
-      a <- calcular_mensajes_diarios(bd()) %>%
+      a <- calcular_var_diarios(bd()) %>%
         summarise(n = round(mean(n, na.rm = T), 0)) %>%
         pull()
 
-      valueBox(value = a, subtitle = "Promedio de mensajes por día", icon = icon("envelope-open"))
+      valueBox(value = scales::comma(a), subtitle = "Promedio de mensajes por día", icon = icon("envelope-open"))
     })
 
     output$prom_msg <-  renderValueBox({
@@ -93,12 +89,37 @@ mod_analisis_whats_server <- function(id, bd){
         summarise(n = round(mean(n), 0)) %>%
         pull(n)
 
-      valueBox(value = a, subtitle = "Promedio de mensajes por usuario", icon("comment-alt"))
+      valueBox(value = scales::comma(a), subtitle = "Promedio de mensajes por usuario", icon("comment-alt"))
+    })
+
+    output$fecha_meta <- renderValueBox({
+
+      a <- calcular_var_diarios(bd(), grupo = T, from, .keep_all = T)
+
+      dias <- (6534 - sum(a$n))/as_tibble(forecast(ets(a$n), h = 1))[[1]]
+
+      fecha = format(Sys.Date() + dias, format = "%d de %B %Y")
+
+      valueBox(subtitle = "Día en que se alcanzaría la meta", value = fecha, icon = icon("calendar-check"))
+
+    })
+
+    output$progreso_grupo <- renderUI({
+
+      a <- distinct(bd(), grupo_wa) %>%
+        tally() %>%
+        pull()
+
+      tags$div(
+        progressGroup("Grupos escuchados", value = a, max = 6534, color = 'red'),
+        hr(),
+        hr()
+      )
     })
 
     output$linea_msg <- renderHighchart({
 
-      a <- calcular_mensajes_diarios(bd())
+      a <- calcular_var_diarios(bd())
 
       graficar_tendencia(a, titulo = "Mensajes enviados por día",
                          yaxis = "Mensajes recibidos")
@@ -107,7 +128,7 @@ mod_analisis_whats_server <- function(id, bd){
 
     output$linea_gpo <- renderHighchart({
 
-      a <- calcular_mensajes_diarios(bd(), grupo = T)
+      a <- calcular_var_diarios(bd(), grupo = T, dia, from)
 
       graficar_tendencia(a, titulo = "Grupos con mensajes enviados por día",
                          yaxis = "Grupos con mensajes enviados")
@@ -136,6 +157,52 @@ mod_analisis_whats_server <- function(id, bd){
                  gridLineWidth = 0) %>%
         hc_title(text = "Distribución de mensajes por grupo")
 
+
+    })
+
+    output$mapa <- renderLeaflet({
+
+      seccion <- secciones %>%
+        count(distrito) %>%
+        mutate(distrito = as.character(distrito))
+
+      aux <- shp_df %>%
+        left_join(seccion) %>%
+        tidyr::replace_na(list(n = 0)) %>%
+        mutate(pct = n/meta_secc)
+
+      paleta <- colorRampPalette(c("white", "red"))(10)
+
+      pal <- colorNumeric(
+        palette = paleta,
+        domain = seq(0, 1, by = 0.1)
+      )
+
+      lft <- leaflet(data = aux,
+                     options = leafletOptions(zoomControl = FALSE)) %>%
+        setView(lng = -99.7612, lat = 19.395056, zoom = 8) %>%
+        addProviderTiles(providers$CartoDB.Positron) %>%
+        addPolygons(
+          weight = 1,
+          stroke = TRUE,
+          color = '#6c757d',
+          fillColor = ~pal(pct),
+          fillOpacity = 1,
+          opacity = 1,
+          popup = ~glue::glue('Entidad: {distrito} <br><br>
+                            Venta total: {scales::percent(pct, accuracy = 1)}' ),
+          highlightOptions = highlightOptions(color = 'white', weight = 2,
+                                              bringToFront = TRUE)
+        ) %>%
+        addLegend('bottomleft', pal = pal, values = ~pct,
+                  title = 'Secciones incluidas por distrito',
+                  labFormat = labelFormat(transform = function(x) x * 100, suffix = "%"))
+
+      return(lft)
+
+
+      leaflet(data = aux) %>%
+        addPolygons()
 
     })
 
