@@ -162,12 +162,15 @@ mod_analisis_whats_server <- function(id, bd){
 
     output$mapa <- renderLeaflet({
 
-      seccion <- secciones %>%
-        count(distrito) %>%
-        mutate(distrito = as.character(distrito))
+      seccion <- clave |>
+        inner_join(bd()) |>
+        filter(nivel == "DISTRITO") |>
+        distinct(unidad, from) |>
+        count(unidad)
+
 
       aux <- shp_df %>%
-        left_join(seccion) %>%
+        left_join(seccion, by = c("distrito" = "unidad")) %>%
         tidyr::replace_na(list(n = 0)) %>%
         mutate(pct = n/meta_secc)
 
@@ -195,7 +198,7 @@ mod_analisis_whats_server <- function(id, bd){
                                               bringToFront = TRUE)
         ) %>%
         addLegend('bottomleft', pal = pal, values = ~pct,
-                  title = 'Secciones incluidas por distrito',
+                  title = 'Grupos activos por distrito',
                   labFormat = labelFormat(transform = function(x) x * 100, suffix = "%"))
 
       return(lft)
