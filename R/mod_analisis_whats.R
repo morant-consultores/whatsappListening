@@ -38,13 +38,18 @@ mod_analisis_whats_ui <- function(id){
                            ),
                            column(6,
                                   highchartOutput(ns("linea_gpo"))
-                                  )
+                           )
                          ),
                          hr(),
                          fluidRow(
                            column(12,
+                                  fluidRow(
+                                    col_3(
+                                      selectInput(ns("nivel"), "Unidad geográfica", choices = c("Distrito" = "distrito"))
+                                    )
+                                  ),
                                   leafletOutput(ns("mapa"))
-                                  )
+                           )
                          ),
                          hr(),
                          fluidRow(
@@ -52,7 +57,7 @@ mod_analisis_whats_ui <- function(id){
                                   highchartOutput(ns("dist_grupo"))
                            ),
                            col_6(
-                                 gt::gt_output(ns("top"))
+                             gt::gt_output(ns("top"))
                            )
                          )
                 )
@@ -66,6 +71,38 @@ mod_analisis_whats_ui <- function(id){
 mod_analisis_whats_server <- function(id, bd){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
+
+    grupos <- reactive({
+      clave |>
+        inner_join(bd()) |>
+        mutate(nivel = tolower(nivel))
+    })
+
+    observe({
+      aux <- grupos() |>
+        distinct(nivel) |>
+        pull()
+
+      a <- grupos() |>
+        distinct(nivel) |>
+        mutate_all(tolower) |>
+        pull() |>
+        purrr::set_names(aux)
+
+      updateSelectInput(session = session, "nivel", choices = a)
+    })
+
+    shp <- eventReactive(input$nivel,{
+      if(input$nivel == "distrito"){
+        shp_df
+      }
+      else if(input$nivel == "municipio") {
+        shp_mun
+      }
+      else if (input$nivel == "seccion") {
+        shp_secc
+      }
+    })
 
     output$total_msg <- renderValueBox({
       a <- nrow(bd())
@@ -162,23 +199,20 @@ mod_analisis_whats_server <- function(id, bd){
 
     output$mapa <- renderLeaflet({
 
-      seccion <- clave |>
-        inner_join(bd()) |>
-        filter(nivel == "DISTRITO") |>
+      seccion <- grupos() |>
+        filter(nivel == !!input$nivel) |>
         distinct(unidad, from) |>
-        count(unidad)
+        count(!!input$nivel := unidad)
 
+      aux <- shp() %>%
+        left_join(seccion) %>%
+        tidyr::replace_na(list(n = 0))
 
-      aux <- shp_df %>%
-        left_join(seccion, by = c("distrito" = "unidad")) %>%
-        tidyr::replace_na(list(n = 0)) %>%
-        mutate(pct = n/meta_secc)
-
-      paleta <- colorRampPalette(c("white", "red"))(10)
+      paleta <- colorRampPalette(c("blue", "white", "red"))(10)
 
       pal <- colorNumeric(
         palette = paleta,
-        domain = seq(0, 1, by = 0.1)
+        domain = seq(min(aux$n), max(aux$n) , by = round(max(aux$n)/10))
       )
 
       lft <- leaflet(data = aux,
@@ -189,23 +223,18 @@ mod_analisis_whats_server <- function(id, bd){
           weight = 1,
           stroke = TRUE,
           color = '#6c757d',
-          fillColor = ~pal(pct),
-          fillOpacity = 1,
-          opacity = 1,
-          popup = ~glue::glue('Entidad: {distrito} <br><br>
-                            Venta total: {scales::percent(pct, accuracy = 1)}' ),
+          fillColor = ~pal(n),
+          fillOpacity = 0.8,
+          opacity = 0.5,
+          popup = ~glue::glue('Entidad: Distrito {distrito} <br><br>
+                            Grupos activos: {n}' ),
           highlightOptions = highlightOptions(color = 'white', weight = 2,
                                               bringToFront = TRUE)
         ) %>%
-        addLegend('bottomleft', pal = pal, values = ~pct,
-                  title = 'Grupos activos por distrito',
-                  labFormat = labelFormat(transform = function(x) x * 100, suffix = "%"))
+        addLegend('bottomleft', pal = pal, values = ~n,
+                  title = 'Grupos activos por distrito')
 
       return(lft)
-
-
-      leaflet(data = aux) %>%
-        addPolygons()
 
     })
 
@@ -233,7 +262,6 @@ mod_analisis_whats_server <- function(id, bd){
           heading.align = "left"
         )
     })
-
 
   })
 }
