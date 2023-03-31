@@ -198,7 +198,6 @@ mod_analisis_whats_server <- function(id, bd){
     })
 
     output$mapa <- renderLeaflet({
-
       seccion <- grupos() |>
         filter(nivel == !!input$nivel) |>
         distinct(unidad, from) |>
