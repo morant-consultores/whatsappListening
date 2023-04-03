@@ -60,7 +60,10 @@ mod_analisis_whats_ui <- function(id){
                              gt::gt_output(ns("top"))
                            )
                          )
-                )
+                ),
+                tabPanel("Contenido",
+                         mod_contenido_whats_ui(ns("contenido_whats_1"))
+                         )
     )
   )
 }
@@ -71,6 +74,8 @@ mod_analisis_whats_ui <- function(id){
 mod_analisis_whats_server <- function(id, bd){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
+
+    mod_contenido_whats_server("contenido_whats_1")
 
     grupos <- reactive({
       clave |>
@@ -198,6 +203,7 @@ mod_analisis_whats_server <- function(id, bd){
     })
 
     output$mapa <- renderLeaflet({
+
       seccion <- grupos() |>
         filter(nivel == !!input$nivel) |>
         distinct(unidad, from) |>
@@ -238,7 +244,6 @@ mod_analisis_whats_server <- function(id, bd){
     })
 
     output$top <- gt::render_gt({
-
       obtener_mayor_participacion(bd()) %>%
         gt::gt() %>%
         tab_header(
