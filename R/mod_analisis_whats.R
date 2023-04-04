@@ -3,7 +3,7 @@
 #' @description A shiny Module.
 #'
 #' @param id,input,output,session Internal parameters for {shiny}.
-#' @import leaflet forecast
+#' @import leaflet forecast sf
 #' @noRd
 #'
 #' @importFrom shiny NS tagList
@@ -79,7 +79,7 @@ mod_analisis_whats_server <- function(id, bd){
 
     grupos <- reactive({
       clave |>
-        inner_join(bd()) |>
+        inner_join(bd(), by = "from") |>
         mutate(nivel = tolower(nivel))
     })
 
@@ -206,8 +206,8 @@ mod_analisis_whats_server <- function(id, bd){
 
       seccion <- grupos() |>
         filter(nivel == !!input$nivel) |>
-        distinct(unidad, from) |>
-        count(!!input$nivel := unidad)
+        distinct(unidad, from, nombre_distrito) |>
+        count(!!input$nivel := unidad, nombre_distrito)
 
       aux <- shp() %>%
         left_join(seccion) %>%
@@ -217,7 +217,7 @@ mod_analisis_whats_server <- function(id, bd){
 
       pal <- colorNumeric(
         palette = paleta,
-        domain = seq(min(aux$n), max(aux$n) , by = round(max(aux$n)/10))
+        domain = seq(min(aux$n), max(aux$n) , by = max(aux$n)/10)
       )
 
       lft <- leaflet(data = aux,
@@ -231,7 +231,7 @@ mod_analisis_whats_server <- function(id, bd){
           fillColor = ~pal(n),
           fillOpacity = 0.8,
           opacity = 0.5,
-          popup = ~glue::glue('Entidad: Distrito {distrito} <br><br>
+          popup = ~glue::glue('Entidad: {nombre_distrito} <br><br>
                             Grupos activos: {n}' ),
           highlightOptions = highlightOptions(color = 'white', weight = 2,
                                               bringToFront = TRUE)

@@ -4,6 +4,12 @@ library(dplyr)
 library(aelectoral2)
 library(sf)
 
+nombre_distrito <- readr::read_csv("data-raw/2021_encarte.csv") |>
+  janitor::clean_names() |>
+  select(distrito = id_distrito_federal, nombre_distrito = cabecera_distrital_federal) |>
+  mutate(distrito = as.character(distrito)) |>
+  distinct()
+
 secciones <- readr::read_csv("data-raw/Simpatizantes.csv") |>
   janitor::clean_names() |>
   filter(whatsapp == "Sí") |>
@@ -27,7 +33,15 @@ bd <- tbl(pool, "K_ESCUCHA") %>%
   collect()
 
 clave <- clave |>
-  inner_join(bd)
+  inner_join(bd) |>
+  group_by(from) |>
+  count(unidad, sort = T) |>
+  filter(n == max(n)) |>
+  ungroup() |>
+  distinct(from, .keep_all = T) |>
+  left_join(nombre_distrito, by = c("unidad" = "distrito")) |>
+  mutate(nombre_distrito = glue::glue("{unidad}. {nombre_distrito}")) |>
+  select(-n)
 
 
 # Unión de meta por distrito para cada distrito ---------------------------
