@@ -213,7 +213,7 @@ mod_analisis_whats_server <- function(id, bd){
         left_join(seccion) %>%
         tidyr::replace_na(list(n = 0))
 
-      paleta <- colorRampPalette(c("blue", "white", "red"))(10)
+      paleta <- colorRampPalette(c(complemento, "white", morena))(10)
 
       pal <- colorNumeric(
         palette = paleta,

@@ -8,6 +8,10 @@
 
 Sys.setlocale(locale = "es_ES.UTF-8")
 
+morena <- "#E81D1D"
+complemento <- "#1DE8B5"
+
+
 progressBar <- function(
     value = 0,
     label = FALSE,

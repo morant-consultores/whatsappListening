@@ -64,7 +64,7 @@ mod_contenido_whats_server <- function(id){
         left_join(a, by = c("distrito" = "unidad")) %>%
         tidyr::replace_na(list(mensajes = 0))
 
-      paleta <- colorRampPalette(c("blue", "white", "red"))(10)
+      paleta <- colorRampPalette(c(complemento, "white", morena))(10)
 
       pal <- colorNumeric(
         palette = paleta,
