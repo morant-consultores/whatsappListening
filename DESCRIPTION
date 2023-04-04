@@ -35,6 +35,7 @@ Imports:
     quanteda.textplots,
     quanteda.textstats,
     scales,
+    sf,
     shiny (>= 1.7.4),
     shinydashboard,
     shinyjs,
