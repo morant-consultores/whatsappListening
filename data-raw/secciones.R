@@ -35,7 +35,7 @@ bd <- tbl(pool, "K_ESCUCHA") %>%
 clave <- clave |>
   inner_join(bd) |>
   group_by(from) |>
-  count(unidad, sort = T) |>
+  count(unidad, nivel,  sort = T) |>
   filter(n == max(n)) |>
   ungroup() |>
   distinct(from, .keep_all = T) |>
@@ -45,11 +45,17 @@ clave <- clave |>
 
 
 # Unión de meta por distrito para cada distrito ---------------------------
-shp <- ElectoralSHP$new("df_21", "mex")
+# shp <- ElectoralSHP$new("df_21", "mex")
+#
+# shp_df <- shp$shp[[1]] %>%
+#   mutate(distritof_21 = as.character(as.numeric(gsub("15_", "", distritof_21)))) %>%
+#   rename(distrito = distritof_21) %>%
+#   st_transform(st_crs(4326))
 
-shp_df <- shp$shp[[1]] %>%
-  mutate(distritof_21 = as.character(as.numeric(gsub("15_", "", distritof_21)))) %>%
-  rename(distrito = distritof_21) %>%
+shp_df <- read_sf("data-raw/DISTRITO_FEDERAL.shp") |>
+  janitor::clean_names() |>
+  rename(distrito = distrito_f) |>
+  mutate(distrito = as.character(distrito)) |>
   st_transform(st_crs(4326))
 
 shp <- ElectoralSHP$new("mun_21", "mex")
