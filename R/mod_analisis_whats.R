@@ -22,15 +22,15 @@ mod_analisis_whats_ui <- function(id){
                            valueBoxOutput(ns("diario_msg"), width = 4),
                            valueBoxOutput(ns("prom_msg"), width = 4)
                          ),
-                         fluidRow(
-                           box(
-                             width = 6,
-                             status = 'primary',
-                             title = 'Progreso de escucha de grupos',
-                             uiOutput(ns('progreso_grupo'))
-                           ),
-                           valueBoxOutput(ns('fecha_meta'), width = 6)
-                         ),
+                         # fluidRow(
+                         #   box(
+                         #     width = 6,
+                         #     status = 'primary',
+                         #     title = 'Progreso de escucha de grupos',
+                         #     uiOutput(ns('progreso_grupo'))
+                         #   ),
+                         #   valueBoxOutput(ns('fecha_meta'), width = 6)
+                         # ),
                          hr(),
                          fluidRow(
                            column(6,
@@ -40,17 +40,17 @@ mod_analisis_whats_ui <- function(id){
                                   highchartOutput(ns("linea_gpo"))
                            )
                          ),
-                         hr(),
-                         fluidRow(
-                           column(12,
-                                  fluidRow(
-                                    col_3(
-                                      selectInput(ns("nivel"), "Unidad geográfica", choices = c("Distrito" = "distrito"))
-                                    )
-                                  ),
-                                  leafletOutput(ns("mapa"))
-                           )
-                         ),
+                         # hr(),
+                         # fluidRow(
+                         #   column(12,
+                         #          fluidRow(
+                         #            col_3(
+                         #              selectInput(ns("nivel"), "Unidad geográfica", choices = c("Distrito" = "distrito"))
+                         #            )
+                         #          ),
+                         #          leafletOutput(ns("mapa"))
+                         #   )
+                         # ),
                          hr(),
                          fluidRow(
                            column(6,
@@ -77,25 +77,25 @@ mod_analisis_whats_server <- function(id, bd){
 
     mod_contenido_whats_server("contenido_whats_1")
 
-    grupos <- reactive({
-      clave |>
-        inner_join(bd(), by = "from") |>
-        mutate(nivel = tolower(nivel))
-    })
-
-    observe({
-      aux <- grupos() |>
-        distinct(nivel) |>
-        pull()
-
-      a <- grupos() |>
-        distinct(nivel) |>
-        mutate_all(tolower) |>
-        pull() |>
-        purrr::set_names(aux)
-
-      updateSelectInput(session = session, "nivel", choices = a)
-    })
+    # grupos <- reactive({
+    #   clave |>
+    #     inner_join(bd(), by = "from") |>
+    #     mutate(nivel = tolower(nivel))
+    # })
+    #
+    # observe({
+    #   aux <- grupos() |>
+    #     distinct(nivel) |>
+    #     pull()
+    #
+    #   a <- grupos() |>
+    #     distinct(nivel) |>
+    #     mutate_all(tolower) |>
+    #     pull() |>
+    #     purrr::set_names(aux)
+    #
+    #   updateSelectInput(session = session, "nivel", choices = a)
+    # })
 
     shp <- eventReactive(input$nivel,{
       if(input$nivel == "distrito"){
@@ -111,7 +111,6 @@ mod_analisis_whats_server <- function(id, bd){
 
     output$total_msg <- renderValueBox({
       a <- nrow(bd())
-
       valueBox(value = scales::comma(a), subtitle = "Total de mensajes recibidos", icon = icon("comments"))
     })
 

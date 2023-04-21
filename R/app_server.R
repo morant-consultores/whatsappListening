@@ -9,11 +9,11 @@ app_server <- function(input, output, session) {
 
   bd <- reactive({
     tbl(pool, "K_ESCUCHA") %>%
-      filter(to == "5215578721958@c.us",
-             from != "5215578107028@c.us",
-             !pushname %in% c("Madre Promueve Delfina", "Cielo Odette", "Memo Chavez", "Medicalexp Bot"),
+      filter(to == "5219613657247@c.us",
+             !pushname %in% c("Cielo Odette", "Memo Chavez", "Lisette Corzo"),
              type == "chat",
-             sql("LOWER(pushname) NOT LIKE '%delfina%'")) %>%
+             #sql("LOWER(pushname) NOT LIKE '%delfina%'")
+             ) %>%
       collect() %>%
       mutate(time = lubridate::as_datetime(time, tz = "America/Mexico_City"),
              dia = format(lubridate::floor_date(time, unit = "day"), format = "%d-%m-%y"),
