@@ -79,8 +79,7 @@ mod_analisis_whats_server <- function(id, bd){
 
     grupos <- reactive({
       clave |>
-        inner_join(bd(), by = "from") |>
-        mutate(nivel = tolower(nivel))
+        inner_join(bd(), by = "from")
     })
 
     observe({

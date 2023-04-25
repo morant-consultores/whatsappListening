@@ -9,7 +9,7 @@ app_server <- function(input, output, session) {
 
   bd <- reactive({
     tbl(pool, "K_ESCUCHA") %>%
-      filter(to == "5215578721958@c.us",
+      filter(to %in% c("5215578721958@c.us", "5215578721958@c.us", "5215578721958:2@c.us"),
              from != "5215578107028@c.us",
              !pushname %in% c("Madre Promueve Delfina", "Cielo Odette", "Memo Chavez", "Medicalexp Bot"),
              type == "chat",
