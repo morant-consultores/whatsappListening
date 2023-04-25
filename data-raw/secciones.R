@@ -4,23 +4,8 @@ library(dplyr)
 library(aelectoral2)
 library(sf)
 
-nombre_distrito <- readr::read_csv("data-raw/2021_encarte.csv") |>
-  janitor::clean_names() |>
-  select(distrito = id_distrito_federal, nombre_distrito = cabecera_distrital_federal) |>
-  mutate(distrito = as.character(distrito)) |>
-  distinct()
 
-secciones <- readr::read_csv("data-raw/Simpatizantes.csv") |>
-  janitor::clean_names() |>
-  filter(whatsapp == "Sí") |>
-  select(seccion, author = telefono_de_contacto, distrito) |>
-  mutate(distrito = as.character(distrito))
-
-clave <- readxl::read_excel("data-raw/Contactos Edo Mex 27 marzo.xlsx") |>
-  janitor::clean_names() |>
-  mutate(author = substr(gsub(" ", "", numero), 5, 14)) |>
-  tidyr::separate(col = nombre_del_grupo, into = c("nivel", "unidad"), sep = "-") |>
-  select(-numero)
+# Carga de insumos --------------------------------------------------------
 
 bd <- tbl(pool, "K_ESCUCHA") %>%
   filter(to == "5215578721958@c.us",
@@ -32,10 +17,40 @@ bd <- tbl(pool, "K_ESCUCHA") %>%
   distinct(author, from) %>%
   collect()
 
+nombre_distrito <- readr::read_csv("data-raw/encarte_2023.csv") |>
+  janitor::clean_names() |>
+  select(distrito = id_distrito_federal, nombre_distrito = cabecera_distrital_federal) |>
+  mutate(distrito = as.character(distrito)) |>
+  distinct()
+
+clave_2703 <- readxl::read_excel("data-raw/Contactos Edo Mex 27 marzo.xlsx") |>
+  janitor::clean_names() |>
+  mutate(author = substr(gsub(" ", "", numero), 5, 14)) |>
+  tidyr::separate(col = nombre_del_grupo, into = c("nivel", "unidad"), sep = "-") |>
+  select(-numero)
+
+clave_0904 <- readxl::read_excel("data-raw/9 abril 23.xlsx") |>
+  janitor::clean_names() |>
+  transmute(nivel = "DISTRITO",
+            unidad = as.character(distrito),
+            author = substr(gsub(" ", "", celular), 5, 14))
+
+clave_secc <-
+
+
+
+# Revisar concordancia entre claves ---------------------------------------
+
+clave <- clave_2703 |>
+  bind_rows(anti_join(clave_0904, clave_2703))
+
+
+# Procesamiento de clave --------------------------------------------------
+
 clave <- clave |>
   inner_join(bd) |>
   group_by(from) |>
-  count(unidad, sort = T) |>
+  count(nivel, unidad, sort = T) |>
   filter(n == max(n)) |>
   ungroup() |>
   distinct(from, .keep_all = T) |>
@@ -63,6 +78,9 @@ shp_mun <- shp$shp[[1]] |>
 shp_secc <- read_sf("data-raw/SECCION.shp") |>
   janitor::clean_names() |>
   st_transform(st_crs(4326))
+
+
+# -------------------------------------------------------------------------
 
 usethis::use_data(clave, overwrite = TRUE)
 usethis::use_data(shp_df, overwrite = TRUE)
