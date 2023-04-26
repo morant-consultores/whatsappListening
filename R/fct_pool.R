@@ -6,7 +6,6 @@
 #' @import gt
 #' @noRd
 
-
 pool <- pool::dbPool(
   drv = odbc::odbc(),
   Driver= 'ODBC Driver 17 for SQL Server',

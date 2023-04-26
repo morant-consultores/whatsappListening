@@ -18,6 +18,13 @@ mod_analisis_whats_ui <- function(id){
                            )
                          ),
                          fluidRow(
+                           column(3,
+                                  shinyWidgets::prettyRadioButtons(ns("nivel"), "Nivel",
+                                                                   choices = c("Distritos" = "distrito",
+                                                                               "Municipios" = "municipio"), inline = T)
+                           )
+                         ),
+                         fluidRow(
                            valueBoxOutput(ns("total_msg"), width = 4),
                            valueBoxOutput(ns("diario_msg"), width = 4),
                            valueBoxOutput(ns("prom_msg"), width = 4)
@@ -43,11 +50,6 @@ mod_analisis_whats_ui <- function(id){
                          hr(),
                          fluidRow(
                            column(12,
-                                  fluidRow(
-                                    col_3(
-                                      selectInput(ns("nivel"), "Unidad geográfica", choices = c("Distrito" = "distrito"))
-                                    )
-                                  ),
                                   leafletOutput(ns("mapa"))
                            )
                          ),
@@ -63,7 +65,7 @@ mod_analisis_whats_ui <- function(id){
                 ),
                 tabPanel("Contenido",
                          mod_contenido_whats_ui(ns("contenido_whats_1"))
-                         )
+                )
     )
   )
 }
@@ -71,29 +73,22 @@ mod_analisis_whats_ui <- function(id){
 #' analisis_whats Server Functions
 #'
 #' @noRd
-mod_analisis_whats_server <- function(id, bd){
+mod_analisis_whats_server <- function(id, inicial){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
     mod_contenido_whats_server("contenido_whats_1")
 
+    bd <- eventReactive(input$nivel, {
+      aux <- ifelse(input$nivel == "distrito", "5215578721958@c.us", "5215568913223@c.us")
+
+      inicial() |>
+        filter(to == !!aux)
+    })
+
     grupos <- reactive({
       clave |>
         inner_join(bd(), by = "from")
-    })
-
-    observe({
-      aux <- grupos() |>
-        distinct(nivel) |>
-        pull()
-
-      a <- grupos() |>
-        distinct(nivel) |>
-        mutate_all(tolower) |>
-        pull() |>
-        purrr::set_names(aux)
-
-      updateSelectInput(session = session, "nivel", choices = a)
     })
 
     shp <- eventReactive(input$nivel,{
@@ -102,9 +97,6 @@ mod_analisis_whats_server <- function(id, bd){
       }
       else if(input$nivel == "municipio") {
         shp_mun
-      }
-      else if (input$nivel == "seccion") {
-        shp_secc
       }
     })
 
