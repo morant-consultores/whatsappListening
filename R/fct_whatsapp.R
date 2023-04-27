@@ -106,7 +106,7 @@ graficar_tendencia <- function(bd, titulo, yaxis) {
 
 obtener_mayor_participacion <- function(bd) {
    a <- list(nombre = bd %>%
-               mutate(pushname = glue::glue("{pushname} ({grupo_wa})")) %>%
+               mutate(pushname = glue::glue("{pushname} ({nombre_distrito})")) %>%
     group_by(author, pushname) %>%
     count(sort = TRUE) %>%
     head(10) %>%
@@ -115,7 +115,9 @@ obtener_mayor_participacion <- function(bd) {
       group_by(author, pushname) %>%
       count(sort = TRUE) %>%
       head(10) %>%
-      pull(n)) %>%
+      pull(n) %>%
+     scales::comma()
+   ) |>
     bind_cols() %>%
      mutate(nombre = stringr::str_to_title(nombre))
   return(a)

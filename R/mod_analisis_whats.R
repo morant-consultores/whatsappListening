@@ -25,18 +25,12 @@ mod_analisis_whats_ui <- function(id){
                            )
                          ),
                          fluidRow(
-                           valueBoxOutput(ns("total_msg"), width = 4),
-                           valueBoxOutput(ns("diario_msg"), width = 4),
-                           valueBoxOutput(ns("prom_msg"), width = 4)
+                           valueBoxOutput(ns("total_msg"), width = 6),
+                           valueBoxOutput(ns("diario_msg"), width = 6)
                          ),
                          fluidRow(
-                           box(
-                             width = 6,
-                             status = 'primary',
-                             title = 'Progreso de escucha de grupos',
-                             uiOutput(ns('progreso_grupo'))
-                           ),
-                           valueBoxOutput(ns('fecha_meta'), width = 6)
+                           valueBoxOutput(ns("prom_msg"), width = 6),
+                           valueBoxOutput(ns('progreso_grupo'), width = 6)
                          ),
                          hr(),
                          fluidRow(
@@ -96,7 +90,8 @@ mod_analisis_whats_server <- function(id, inicial){
         shp_df
       }
       else if(input$nivel == "municipio") {
-        shp_mun
+        shp_mun |>
+          mutate(municipio = as.character(municipio))
       }
     })
 
@@ -125,29 +120,12 @@ mod_analisis_whats_server <- function(id, inicial){
       valueBox(value = scales::comma(a), subtitle = "Promedio de mensajes por usuario", icon("comment-alt"))
     })
 
-    output$fecha_meta <- renderValueBox({
-
-      a <- calcular_var_diarios(bd(), grupo = T, from, .keep_all = T)
-
-      dias <- (6534 - sum(a$n))/as_tibble(forecast(ets(a$n), h = 1))[[1]]
-
-      fecha = format(Sys.Date() + dias, format = "%d de %B %Y")
-
-      valueBox(subtitle = "Día en que se alcanzaría la meta", value = fecha, icon = icon("calendar-check"))
-
-    })
-
-    output$progreso_grupo <- renderUI({
-
-      a <- distinct(bd(), grupo_wa) %>%
+    output$progreso_grupo <- renderValueBox({
+      a <- distinct(bd(), from) %>%
         tally() %>%
         pull()
 
-      tags$div(
-        progressGroup("Grupos escuchados", value = a, max = 6534, color = 'red'),
-        hr(),
-        hr()
-      )
+      valueBox(subtitle = "Grupos escuchados", value = a, icon = icon("people-group"))
     })
 
     output$linea_msg <- renderHighchart({
@@ -194,10 +172,7 @@ mod_analisis_whats_server <- function(id, inicial){
     })
 
     output$mapa <- renderLeaflet({
-
       seccion <- grupos() |>
-        filter(nivel == !!input$nivel) |>
-        distinct(unidad, from, nombre_distrito) |>
         count(!!input$nivel := unidad, nombre_distrito)
 
       aux <- shp() %>%
@@ -208,8 +183,8 @@ mod_analisis_whats_server <- function(id, inicial){
 
       pal <- colorNumeric(
         palette = paleta,
-        domain = seq(min(aux$n), max(aux$n) , by = max(aux$n)/10)
-      )
+        domain = aux$n
+        )
 
       lft <- leaflet(data = aux,
                      options = leafletOptions(zoomControl = FALSE)) %>%
@@ -223,19 +198,19 @@ mod_analisis_whats_server <- function(id, inicial){
           fillOpacity = 0.8,
           opacity = 0.5,
           popup = ~glue::glue('Entidad: {nombre_distrito} <br><br>
-                            Grupos activos: {n}' ),
+                            Mensajes escuchados: {scales::comma(n)}' ),
           highlightOptions = highlightOptions(color = 'white', weight = 2,
                                               bringToFront = TRUE)
         ) %>%
         addLegend('bottomleft', pal = pal, values = ~n,
-                  title = 'Grupos activos por distrito')
+                  title = 'Mensajes escuchados')
 
       return(lft)
 
     })
 
     output$top <- gt::render_gt({
-      obtener_mayor_participacion(bd()) %>%
+      obtener_mayor_participacion(grupos()) %>%
         gt::gt() %>%
         tab_header(
           title = glue::glue("Top 10: Usuarios más activos")

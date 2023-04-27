@@ -15,6 +15,7 @@ app_server <- function(input, output, session) {
              type == "chat",
              sql("LOWER(pushname) NOT LIKE '%delfina%'")) %>%
       collect() %>%
+      filter(grepl("@g", from)) |>
       mutate(time = lubridate::as_datetime(time, tz = "America/Mexico_City"),
              dia = format(lubridate::floor_date(time, unit = "day"), format = "%d-%m-%y"),
              hora = format(lubridate::floor_date(time, unit = "hour"), format = "%H:%M"),
