@@ -2,7 +2,7 @@
 #'
 #' @param request Internal parameter for `{shiny}`.
 #'     DO NOT REMOVE.
-#' @import shiny shinydashboard
+#' @import shiny shinydashboard fresh
 #' @noRd
 app_ui <- function(request) {
   tagList(
@@ -25,6 +25,7 @@ app_ui <- function(request) {
         )
       ),
       body = dashboardBody(
+        use_theme(mi_tema),
         tabItems(
           tabItem(tabName = "solicitudes",
                   mod_solicitudes_ui("solicitudes_1")

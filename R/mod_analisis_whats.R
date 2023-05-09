@@ -18,19 +18,11 @@ mod_analisis_whats_ui <- function(id){
                            )
                          ),
                          fluidRow(
-                           valueBoxOutput(ns("total_msg"), width = 4),
-                           valueBoxOutput(ns("diario_msg"), width = 4),
-                           valueBoxOutput(ns("prom_msg"), width = 4)
+                           valueBoxOutput(ns("total_msg"), width = 3),
+                           valueBoxOutput(ns("diario_msg"), width = 3),
+                           valueBoxOutput(ns("prom_msg"), width = 3),
+                           valueBoxOutput(ns("grupos"), width = 3)
                          ),
-                         # fluidRow(
-                         #   box(
-                         #     width = 6,
-                         #     status = 'primary',
-                         #     title = 'Progreso de escucha de grupos',
-                         #     uiOutput(ns('progreso_grupo'))
-                         #   ),
-                         #   valueBoxOutput(ns('fecha_meta'), width = 6)
-                         # ),
                          hr(),
                          fluidRow(
                            column(6,
@@ -60,10 +52,10 @@ mod_analisis_whats_ui <- function(id){
                              gt::gt_output(ns("top"))
                            )
                          )
-                ),
-                tabPanel("Contenido",
-                         mod_contenido_whats_ui(ns("contenido_whats_1"))
-                         )
+                )#,
+                # tabPanel("Contenido",
+                #          mod_contenido_whats_ui(ns("contenido_whats_1"))
+                #          )
     )
   )
 }
@@ -111,7 +103,8 @@ mod_analisis_whats_server <- function(id, bd){
 
     output$total_msg <- renderValueBox({
       a <- nrow(bd())
-      valueBox(value = scales::comma(a), subtitle = "Total de mensajes recibidos", icon = icon("comments"))
+      valueBox(value = scales::comma(a), subtitle = "Total de mensajes recibidos", icon = icon("comments"),
+               color = "olive")
     })
 
     output$diario_msg <-  renderValueBox({
@@ -120,7 +113,8 @@ mod_analisis_whats_server <- function(id, bd){
         summarise(n = round(mean(n, na.rm = T), 0)) %>%
         pull()
 
-      valueBox(value = scales::comma(a), subtitle = "Promedio de mensajes por día", icon = icon("envelope-open"))
+      valueBox(value = scales::comma(a), subtitle = "Promedio de mensajes por día", icon = icon("envelope-open"),
+               color = "olive")
     })
 
     output$prom_msg <-  renderValueBox({
@@ -130,7 +124,8 @@ mod_analisis_whats_server <- function(id, bd){
         summarise(n = round(mean(n), 0)) %>%
         pull(n)
 
-      valueBox(value = scales::comma(a), subtitle = "Promedio de mensajes por usuario", icon("comment-alt"))
+      valueBox(value = scales::comma(a), subtitle = "Promedio de mensajes por usuario",
+               icon("comment-alt"), color = "olive")
     })
 
     output$fecha_meta <- renderValueBox({
@@ -141,21 +136,18 @@ mod_analisis_whats_server <- function(id, bd){
 
       fecha = format(Sys.Date() + dias, format = "%d de %B %Y")
 
-      valueBox(subtitle = "Día en que se alcanzaría la meta", value = fecha, icon = icon("calendar-check"))
+      valueBox(subtitle = "Día en que se alcanzaría la meta", value = fecha,
+               icon = icon("calendar-check"), color = "olive")
 
     })
 
-    output$progreso_grupo <- renderUI({
+    output$grupos <- renderValueBox({
+      a <- bd() |>
+        distinct(from) |>
+        nrow()
 
-      a <- distinct(bd(), grupo_wa) %>%
-        tally() %>%
-        pull()
-
-      tags$div(
-        progressGroup("Grupos escuchados", value = a, max = 6534, color = 'red'),
-        hr(),
-        hr()
-      )
+      valueBox(subtitle = "Grupos escuchados", value = a, icon = icon("people-group"),
+               color = "olive")
     })
 
     output$linea_msg <- renderHighchart({
