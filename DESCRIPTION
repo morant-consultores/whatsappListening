@@ -39,6 +39,7 @@ Imports:
     shiny (>= 1.7.4),
     shinydashboard,
     shinyjs,
+    shinyWidgets,
     stringr,
     tidyr
 Suggests: 

@@ -9,9 +9,10 @@
 pool <- pool::dbPool(
   drv = odbc::odbc(),
   Driver= 'ODBC Driver 17 for SQL Server',
-  Database = "DIRECTORIO",
-  Server = "db.netdevelop.mx",
-  UID = "empread",
-  PWD = "empread",
-  Port = 1433
+  Database = "RESPALDODIRECTORIO",
+  Server = "tcp:morant.database.windows.net",
+  UID = "emorones",
+  PWD = "Presidevis-Emi",
+  Port = 1433,
+  timeout = 120
 )
