@@ -10,7 +10,7 @@
 pool <- pool::dbPool(
   drv = odbc::odbc(),
   Driver= 'ODBC Driver 17 for SQL Server',
-  Database = "RESPALDODIRECTORIO",
+  Database = "DIRECTORIO",
   Server = "tcp:morant.database.windows.net",
   UID = "emorones",
   PWD = "Presidevis-Emi",

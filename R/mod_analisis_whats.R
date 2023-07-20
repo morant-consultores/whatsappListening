@@ -52,10 +52,10 @@ mod_analisis_whats_ui <- function(id){
                              gt::gt_output(ns("top"))
                            )
                          )
-                )#,
-                # tabPanel("Contenido",
-                #          mod_contenido_whats_ui(ns("contenido_whats_1"))
-                #          )
+                ),
+                tabPanel("Contenido",
+                         mod_contenido_whats_ui(ns("contenido_whats_1"))
+                         )
     )
   )
 }

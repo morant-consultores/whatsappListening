@@ -18,6 +18,7 @@
 ## install.packages('attachment') # if needed.
 attachment::att_amend_desc()
 
+
 ## Add modules ----
 ## Create a module infrastructure in R/
 golem::add_module(name = "solicitudes", with_test = TRUE) # Name of the module
@@ -42,6 +43,7 @@ golem::add_sass_file("custom")
 ## If you have data in your package
 usethis::use_data_raw(name = "aws", open = FALSE)
 usethis::use_data_raw(name = "secciones", open = FALSE)
+usethis::use_data_raw(name = "respaldo", open = FALSE)
 ## Tests ----
 ## Add one line by test you want to create
 usethis::use_test("app")

@@ -9,7 +9,7 @@ app_server <- function(input, output, session) {
 
   bd <- reactive({
     tbl(pool, "K_ESCUCHA") %>%
-      filter(to == "5219613657247@c.us",
+      filter(to == "5219671858096@c.us",
              !pushname %in% c("Cielo Odette", "Memo Chavez", "Lisette Corzo"),
              type == "chat",
              #sql("LOWER(pushname) NOT LIKE '%delfina%'")
@@ -25,7 +25,8 @@ app_server <- function(input, output, session) {
              grupo_wa = as.integer(factor(from, levels = unique(from))),
              author = substr(author, 4, 13)
       ) %>%
-      janitor::clean_names()
+      janitor::clean_names() |>
+      bind_rows(respaldo)
   })
 
   # mod_solicitudes_server("solicitudes_1")
