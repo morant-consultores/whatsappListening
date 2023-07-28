@@ -9,7 +9,7 @@ app_server <- function(input, output, session) {
 
   bd <- reactive({
     tbl(pool, "K_ESCUCHA") %>%
-      filter(to == "5219671858096@c.us",
+      filter(to  %in% c("5219671858096@c.us", "5219995531136@c.us"),
              !pushname %in% c("Cielo Odette", "Memo Chavez", "Lisette Corzo"),
              type == "chat",
              #sql("LOWER(pushname) NOT LIKE '%delfina%'")
