@@ -44,6 +44,7 @@ golem::add_sass_file("custom")
 usethis::use_data_raw(name = "aws", open = FALSE)
 usethis::use_data_raw(name = "secciones", open = FALSE)
 usethis::use_data_raw(name = "respaldo", open = FALSE)
+usethis::use_data_raw(name = "relacion", open = TRUE)
 ## Tests ----
 ## Add one line by test you want to create
 usethis::use_test("app")

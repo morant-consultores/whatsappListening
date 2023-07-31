@@ -12,6 +12,12 @@ mod_contenido_whats_ui <- function(id){
   fluidPage(
     fluidRow(
       column(3,
+             selectInput(ns("nivel"), "Nivel", choices = c("Todos" = "", "Distrito", "Municipio"))
+             ),
+      column(3,
+             selectInput(ns("unidad"), "Unidad", choices = c("Todos" = ""))
+             ),
+      column(3,
              dateInput(ns("fecha"),label = "Fecha", format = "dd-MM", language = "es")
       )
     ),
@@ -38,6 +44,19 @@ mod_contenido_whats_server <- function(id){
     inicial <- reactive({
       tbl(pool, "resumen_conv_chis") |>
         collect()
+    })
+
+    observeEvent(input$nivel,{
+      if(input$nivel != ""){
+        a <- relacion |>
+          filter(nivel == input$nivel) |>
+          pull(unidad) |>
+          sort()
+
+        updateSelectInput(session = session, "unidad", choices = c("Todos" = "", a))
+      } else {
+        updateSelectInput(session = session, "unidad", choices = c("Todos" = ""))
+      }
     })
 
     observe({
