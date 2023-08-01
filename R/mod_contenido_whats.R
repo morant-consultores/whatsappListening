@@ -12,10 +12,9 @@ mod_contenido_whats_ui <- function(id){
   fluidPage(
     fluidRow(
       column(3,
-             selectInput(ns("nivel"), "Nivel", choices = c("Todos" = "", "Distrito", "Municipio"))
-             ),
-      column(3,
-             selectInput(ns("unidad"), "Unidad", choices = c("Todos" = ""))
+             selectInput(ns("nivel"), "Nivel", choices = c("Todos" = "",
+                                                           "Distrito" = "distrito",
+                                                           "Municipio" = "municipio"))
              ),
       column(3,
              dateInput(ns("fecha"),label = "Fecha", format = "dd-MM", language = "es")
@@ -43,20 +42,11 @@ mod_contenido_whats_server <- function(id){
 
     inicial <- reactive({
       tbl(pool, "resumen_conv_chis") |>
-        collect()
-    })
-
-    observeEvent(input$nivel,{
-      if(input$nivel != ""){
-        a <- relacion |>
-          filter(nivel == input$nivel) |>
-          pull(unidad) |>
-          sort()
-
-        updateSelectInput(session = session, "unidad", choices = c("Todos" = "", a))
-      } else {
-        updateSelectInput(session = session, "unidad", choices = c("Todos" = ""))
-      }
+        collect() |>
+        left_join(relacion, join_by(from)) |>
+        tidyr::replace_na(list(nombre = "No identificado",
+                               nivel = "No identificado",
+                               unidad = "No identificada"))
     })
 
     observe({
@@ -66,7 +56,12 @@ mod_contenido_whats_server <- function(id){
     })
 
     base <- reactive({
-      inicial() |>
+      a <- inicial()
+      if(input$nivel != ""){
+        a <- inicial() |>
+          filter(nivel == input$nivel)
+      }
+      a <- a |>
         filter(dia == input$fecha)
     })
 
@@ -110,10 +105,10 @@ mod_contenido_whats_server <- function(id){
     # })
 
     output$tabla <- renderDT(server = FALSE, {
-      req(nrow(base()) > 0)
+      validate(need(nrow(base() > 0), message = "En este día no se escucharon diálogos. Intenta con una nueva fecha"))
 
       base() |>
-        select(from, dia, resumen) |>
+        select(nombre, dia, nivel, unidad, resumen) |>
         mutate(dia = format(dia, "%d de %B")) |>
         datatable(selection = 'none', rownames = FALSE, extensions =  'Buttons',
                   options = list(language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json',
