@@ -5,7 +5,7 @@
 #' @param id,input,output,session Internal parameters for {shiny}.
 #'
 #' @noRd
-#'
+#' @import sf
 #' @importFrom shiny NS tagList
 mod_contenido_whats_ui <- function(id){
   ns <- NS(id)
@@ -15,16 +15,18 @@ mod_contenido_whats_ui <- function(id){
              selectInput(ns("nivel"), "Nivel", choices = c("Todos" = "",
                                                            "Distrito" = "distrito",
                                                            "Municipio" = "municipio"))
-             ),
+      ),
       column(3,
              dateInput(ns("fecha"),label = "Fecha", format = "dd-MM", language = "es")
       )
     ),
-    # fluidRow(
-    #   column(12,
-    #          leafletOutput(ns("mapa"))
-    #   )
-    # ),
+    shinyjs::hidden(
+      fluidRow(id = "mapa_nivel",
+               column(12,
+                      leafletOutput(ns("mapa"))
+               )
+      )
+    ),
     fluidRow(
       column(12,
              DTOutput(ns("tabla"))
@@ -51,8 +53,11 @@ mod_contenido_whats_server <- function(id){
 
     observe({
       fecha <- range(inicial()$dia)
-
       updateDateInput(session = session, "fecha", value = fecha[[2]], min = fecha[[1]], max = fecha[[2]])
+    })
+
+    observeEvent(input$nivel, {
+      shinyjs::toggle("mapa_nivel", condition = input$nivel != "")
     })
 
     base <- reactive({
