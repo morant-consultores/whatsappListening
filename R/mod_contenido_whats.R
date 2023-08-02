@@ -10,6 +10,7 @@
 mod_contenido_whats_ui <- function(id){
   ns <- NS(id)
   fluidPage(
+    useShinyjs(),
     fluidRow(
       column(3,
              selectInput(ns("nivel"), "Nivel", choices = c("Todos" = "",
@@ -20,12 +21,10 @@ mod_contenido_whats_ui <- function(id){
              dateInput(ns("fecha"),label = "Fecha", format = "dd-MM", language = "es")
       )
     ),
-    shinyjs::hidden(
-      fluidRow(id = "mapa_nivel",
-               column(12,
-                      leafletOutput(ns("mapa"))
-               )
-      )
+    fluidRow(id = ns("mapa_nivel"),
+             column(12,
+                    leafletOutput(ns("mapa"))
+             )
     ),
     fluidRow(
       column(12,
@@ -54,10 +53,11 @@ mod_contenido_whats_server <- function(id){
     observe({
       fecha <- range(inicial()$dia)
       updateDateInput(session = session, "fecha", value = fecha[[2]], min = fecha[[1]], max = fecha[[2]])
-    })
-
-    observeEvent(input$nivel, {
-      shinyjs::toggle("mapa_nivel", condition = input$nivel != "")
+      if(input$nivel == ""){
+        shinyjs::hide("mapa_nivel")
+      } else{
+        shinyjs::show("mapa_nivel")
+      }
     })
 
     base <- reactive({
@@ -70,44 +70,56 @@ mod_contenido_whats_server <- function(id){
         filter(dia == input$fecha)
     })
 
-    # output$mapa <- renderLeaflet({
-    #
-    #   validate(need(sum(base()$mensajes) > 0, "Sin información suficiente"))
-    #
-    #   a <- base() |>
-    #     distinct(unidad, mensajes) |>
-    #     mutate(mensajes = as.numeric(mensajes))
-    #
-    #   aux <- shp_df |>
-    #     left_join(a, by = c("distrito" = "unidad")) %>%
-    #     tidyr::replace_na(list(mensajes = 0))
-    #
-    #   paleta <- colorRampPalette(c(complemento, "white", morena))(10)
-    #
-    #   pal <- colorNumeric(
-    #     palette = paleta,
-    #     domain = seq(min(aux$mensajes), max(aux$mensajes) , by = max(aux$mensajes)/10)
-    #   )
-    #
-    #   lft <- leaflet(data = aux,
-    #                  options = leafletOptions(zoomControl = FALSE)) %>%
-    #     setView(lng = -99.7612, lat = 19.395056, zoom = 8) %>%
-    #     addProviderTiles(providers$CartoDB.Positron) %>%
-    #     addPolygons(
-    #       weight = 1,
-    #       stroke = TRUE,
-    #       color = '#6c757d',
-    #       fillColor = ~pal(mensajes),
-    #       fillOpacity = 0.8,
-    #       opacity = 0.5,
-    #       popup = ~glue::glue('Entidad: Distrito {distrito} <br><br>
-    #                         Mensajes escuchados: {mensajes}'),
-    #       highlightOptions = highlightOptions(color = 'white', weight = 2,
-    #                                           bringToFront = TRUE)
-    #     ) %>%
-    #     addLegend('bottomleft', pal = pal, values = ~mensajes,
-    #               title = 'Distribución de mensajes escuchados por distrito')
-    # })
+    shp <- eventReactive(input$nivel, {
+      if(input$nivel == "distrito"){
+        shp <- shp_df
+      } else if (input$nivel == "municipio") {
+        shp <- shp_mun
+      } else {
+        shp <- NULL
+      }
+
+      return(shp)
+    })
+
+    output$mapa <- renderLeaflet({
+      req(input$nivel != "" & nrow(base()) > 0)
+      a <- base() |>
+        distinct(unidad, mensajes) |>
+        mutate(mensajes = as.numeric(mensajes)) |>
+        rename(!!rlang::sym(input$nivel) := unidad)
+
+      aux <- shp() |>
+        left_join(a)
+
+      paleta <- colorRampPalette(c("#5e60ce", "white", "#48bfe3"))(5)
+
+      pal <- colorNumeric(
+        palette = paleta,
+        domain = aux$mensajes
+      )
+
+      aux2 <- if_else(input$nivel == "distrito", "Distrito", "Municipio")
+
+      lft <- leaflet(data = aux,
+                     options = leafletOptions(zoomControl = FALSE)) %>%
+        #setView(lng = -99.7612, lat = 19.395056, zoom = 8) %>%
+        addProviderTiles(providers$CartoDB.Positron) %>%
+        addPolygons(
+          weight = 1,
+          stroke = TRUE,
+          color = '#6c757d',
+          fillColor = ~pal(mensajes),
+          fillOpacity = 0.8,
+          opacity = 0.5,
+          popup = ~glue::glue('{aux2} {input$nivel} <br><br>
+                            Mensajes escuchados: {mensajes}'),
+          highlightOptions = highlightOptions(color = 'white', weight = 2,
+                                              bringToFront = TRUE)
+        ) %>%
+        addLegend('bottomleft', pal = pal, values = ~mensajes,
+                  title = glue::glue('Distribución de mensajes escuchados por {input$nivel}'))
+    })
 
     output$tabla <- renderDT(server = FALSE, {
       validate(need(nrow(base() > 0), message = "En este día no se escucharon diálogos. Intenta con una nueva fecha"))

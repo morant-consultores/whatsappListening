@@ -1,6 +1,13 @@
 ## code to prepare `relacion` dataset goes here
 library(readr)
 library(dplyr)
+library(sf)
+
+nombres_mun <- read_sf("data-raw/MUNICIPIO.shp") |>
+  janitor::clean_names() |>
+  as_tibble() |>
+  select(nombre, municipio) |>
+  mutate(municipio = as.character(municipio))
 
 relacion <- read_csv("data-raw/relacion.csv") |>
   janitor::clean_names() |>
@@ -8,12 +15,12 @@ relacion <- read_csv("data-raw/relacion.csv") |>
          nombre = nombre_del_grupo,
          nivel = unidad,
          unidad = nivel) |>
-  mutate(nivel = if_else(nivel == "Ditrito", "Distrito", nivel)) |>
   filter(nivel != "N/A") |>
-  tidyr::pivot_wider(id_cols = c(from, nombre), names_from = nivel, values_from = unidad) |>
-  janitor::clean_names() |>
-  mutate(municipio = if_else(municipio == "Ocosiongo", "Ocosingo", municipio)) |>
-  tidyr::pivot_longer(cols = c(municipio, distrito), names_to = "nivel", values_to = "unidad") |>
-  filter(!is.na(unidad))
+  mutate(nivel = if_else(nivel == "Ditrito", "Distrito", nivel),
+         unidad = if_else(nivel == "Municipio", toupper(stringi::stri_trans_general(unidad, id = "latin-ascii")), unidad)) |>
+  left_join(nombres_mun, join_by(unidad == nombre)) |>
+  mutate(unidad = if_else(nivel == "Municipio", municipio, unidad),
+         nivel = tolower(nivel)) |>
+  select(-municipio)
 
 usethis::use_data(relacion, overwrite = TRUE)
