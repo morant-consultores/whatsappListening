@@ -50,8 +50,15 @@ relacion2 <- read_csv("data-raw/Vinculacion whatsapp listening 17082023.csv") |>
 relacion3 <- read_excel("data-raw/base de whatsapp para chiapas.xlsx") |>
   janitor::clean_names() |>
   rename(nombre = "posible_grupo") |>
-  mutate(nivel = tolower(nivel))
+  mutate(nivel = tolower(nivel),
+         unidad = as.character(unidad))
 
-relacion <- bind_rows(relacion1, relacion2)
+relacion <- bind_rows(relacion1, relacion2, relacion3) |>
+  mutate(nivel = if_else(nivel == "seccional", "seccion", nivel))
 
 usethis::use_data(relacion, overwrite = TRUE)
+
+
+
+
+

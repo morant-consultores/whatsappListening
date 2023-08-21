@@ -19,3 +19,10 @@ shp_mun <- sf::read_sf("data-raw/MUNICIPIO.shp") |>
   mutate(municipio = as.character(municipio))
 
 usethis::use_data(shp_mun, overwrite = TRUE)
+
+shp_secc <- sf::read_sf("data-raw/SECCION.shp") |>
+  sf::st_transform(crs = st_crs(4326)) |>
+  janitor::clean_names() |>
+  mutate(seccion = as.character(seccion))
+
+usethis::use_data(shp_secc, overwrite = TRUE)

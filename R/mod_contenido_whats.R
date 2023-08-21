@@ -15,7 +15,8 @@ mod_contenido_whats_ui <- function(id){
       column(3,
              selectInput(ns("nivel"), "Nivel", choices = c("Todos" = "",
                                                            "Distrito" = "distrito",
-                                                           "Municipio" = "municipio"))
+                                                           "Municipio" = "municipio",
+                                                           "Sección" = "seccion"))
       ),
       column(3,
              dateInput(ns("fecha"),label = "Fecha", format = "dd-MM", language = "es")
@@ -75,22 +76,26 @@ mod_contenido_whats_server <- function(id){
         shp <- shp_df
       } else if (input$nivel == "municipio") {
         shp <- shp_mun
+      } else if (input$nivel == "seccion") {
+        shp <- shp_secc
       } else {
         shp <- NULL
       }
-
       return(shp)
     })
 
     output$mapa <- renderLeaflet({
-      req(input$nivel != "" & nrow(base()) > 0)
+      validate(need((input$nivel != "" & nrow(base()) > 0), message = "En este día no se escucharon diálogos. Intenta con una nueva fecha"))
+      temp <- if_else(input$nivel == "municipio", "nombre", input$nivel)
+
       a <- base() |>
         distinct(unidad, mensajes) |>
         mutate(mensajes = as.numeric(mensajes)) |>
         rename(!!rlang::sym(input$nivel) := unidad)
 
       aux <- shp() |>
-        left_join(a)
+        left_join(a) |>
+        mutate(grupo = !!rlang::sym(as.character(temp)))
 
       paleta <- colorRampPalette(c("#5e60ce", "white", "#48bfe3"))(5)
 
@@ -99,7 +104,9 @@ mod_contenido_whats_server <- function(id){
         domain = aux$mensajes
       )
 
-      aux2 <- if_else(input$nivel == "distrito", "Distrito", "Municipio")
+      aux2 <- case_when(input$nivel == "distrito" ~ "Distrito",
+                        input$nivel == "municipio" ~ "Municipio",
+                        input$nivel == "seccion" ~ "Sección")
 
       lft <- leaflet(data = aux,
                      options = leafletOptions(zoomControl = FALSE)) %>%
@@ -108,17 +115,17 @@ mod_contenido_whats_server <- function(id){
         addPolygons(
           weight = 1,
           stroke = TRUE,
-          color = '#6c757d',
+          color = ~pal(mensajes),
           fillColor = ~pal(mensajes),
           fillOpacity = 0.8,
           opacity = 0.5,
-          popup = ~glue::glue('{aux2} {input$nivel} <br><br>
+          popup = ~glue::glue('{aux2}: {grupo} <br>
                             Mensajes escuchados: {mensajes}'),
           highlightOptions = highlightOptions(color = 'white', weight = 2,
                                               bringToFront = TRUE)
         ) %>%
         addLegend('bottomleft', pal = pal, values = ~mensajes,
-                  title = glue::glue('Distribución de mensajes escuchados por {input$nivel}'))
+                  title = glue::glue('Número de mensajes por {input$nivel}'))
     })
 
     output$tabla <- renderDT(server = FALSE, {
