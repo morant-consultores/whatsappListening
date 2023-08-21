@@ -2,6 +2,7 @@
 library(readr)
 library(dplyr)
 library(sf)
+library(readxl)
 
 nombres_mun <- read_sf("data-raw/MUNICIPIO.shp") |>
   janitor::clean_names() |>
@@ -9,7 +10,7 @@ nombres_mun <- read_sf("data-raw/MUNICIPIO.shp") |>
   select(nombre, municipio) |>
   mutate(municipio = as.character(municipio))
 
-relacion <- read_csv("data-raw/relacion.csv") |>
+relacion1 <- read_csv("data-raw/relacion.csv") |>
   janitor::clean_names() |>
   rename(from = id,
          nombre = nombre_del_grupo,
@@ -22,5 +23,35 @@ relacion <- read_csv("data-raw/relacion.csv") |>
   mutate(unidad = if_else(nivel == "Municipio", municipio, unidad),
          nivel = tolower(nivel)) |>
   select(-municipio)
+
+relacion2 <- read_csv("data-raw/Vinculacion whatsapp listening 17082023.csv") |>
+  janitor::clean_names() |>
+  rename(nivel = unidad,
+         unidad = nivel,
+         nombre = nombre_de_grupo) |>
+  mutate(nivel = iconv(nivel, from = "ISO-8859-1", to = "UTF-8"),
+         nombre = iconv(nombre, from = "ISO-8859-1", to = "UTF-8"),
+         unidad = stringi::stri_trans_general(
+           toupper(
+             iconv(unidad, from = "ISO-8859-1", to = "UTF-8")
+             ),
+           id = "latin-ascii"),
+         nivel = tolower(nivel),
+         nivel = if_else(nivel == "colonia/fraccionamiento", "colonia", nivel),
+         nivel = forcats::fct_lump_min(nivel, min = 20, other_level = "otros")
+  ) |>
+  naniar::replace_with_na(replace = list(nivel = "N/a",
+                                         unidad = c("N/A", "n/a"))) |>
+  left_join(nombres_mun, join_by(unidad == nombre)) |>
+  mutate(unidad = if_else(nivel == "Municipio", municipio, unidad),
+         nivel = tolower(nivel)) |>
+  select(-municipio)
+
+relacion3 <- read_excel("data-raw/base de whatsapp para chiapas.xlsx") |>
+  janitor::clean_names() |>
+  rename(nombre = "posible_grupo") |>
+  mutate(nivel = tolower(nivel))
+
+relacion <- bind_rows(relacion1, relacion2)
 
 usethis::use_data(relacion, overwrite = TRUE)
