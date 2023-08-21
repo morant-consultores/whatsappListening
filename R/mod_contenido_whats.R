@@ -133,7 +133,9 @@ mod_contenido_whats_server <- function(id){
 
       base() |>
         select(nombre, dia, nivel, unidad, resumen) |>
-        mutate(dia = format(dia, "%d de %B")) |>
+        mutate(dia = format(dia, "%d de %B"),
+               nivel = stringr::str_to_sentence(nivel)) |>
+        rename_all(toupper) |>
         datatable(selection = 'none', rownames = FALSE, extensions =  'Buttons',
                   options = list(language = list(url = '//cdn.datatables.net/plug-ins/1.10.11/i18n/Spanish.json',
                                                  searchPlaceholder = "Buscar...", sSearch = ""),
