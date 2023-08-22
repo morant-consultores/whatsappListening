@@ -48,7 +48,8 @@ mod_contenido_whats_server <- function(id){
         left_join(relacion, join_by(from)) |>
         tidyr::replace_na(list(nombre = "No identificado",
                                nivel = "No identificado",
-                               unidad = "No identificada"))
+                               unidad = "No identificada")) |>
+        distinct()
     })
 
     observe({
@@ -86,7 +87,8 @@ mod_contenido_whats_server <- function(id){
 
     output$mapa <- renderLeaflet({
       validate(need((input$nivel != "" & nrow(base()) > 0), message = "En este día no se escucharon diálogos. Intenta con una nueva fecha"))
-      temp <- if_else(input$nivel == "municipio", "nombre", input$nivel)
+      temp <- case_when(input$nivel == "distrito" ~ "nombre_distrito",
+                        T ~ input$nivel)
 
       a <- base() |>
         distinct(unidad, mensajes) |>
@@ -95,7 +97,7 @@ mod_contenido_whats_server <- function(id){
 
       aux <- shp() |>
         left_join(a) |>
-        mutate(grupo = !!rlang::sym(as.character(temp)))
+        mutate(grupo = !!rlang::sym(temp))
 
       paleta <- colorRampPalette(c("#5e60ce", "white", "#48bfe3"))(5)
 
@@ -132,7 +134,7 @@ mod_contenido_whats_server <- function(id){
       validate(need(nrow(base() > 0), message = "En este día no se escucharon diálogos. Intenta con una nueva fecha"))
 
       base() |>
-        select(nombre, dia, nivel, unidad, resumen) |>
+        distinct(nombre, dia, nivel, unidad = nombre_nivel, resumen) |>
         mutate(dia = format(dia, "%d de %B"),
                nivel = stringr::str_to_sentence(nivel)) |>
         rename_all(toupper) |>
