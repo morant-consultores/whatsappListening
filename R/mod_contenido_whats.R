@@ -45,11 +45,12 @@ mod_contenido_whats_server <- function(id){
     inicial <- reactive({
       tbl(pool, "resumen_conv_chis") |>
         collect() |>
+        distinct(dia, from, resumen, .keep_all = T) |>
         left_join(relacion, join_by(from)) |>
         tidyr::replace_na(list(nombre = "No identificado",
                                nivel = "No identificado",
-                               unidad = "No identificada")) |>
-        distinct()
+                               unidad = "No identificada",
+                               nombre_nivel = "No identificada"))
     })
 
     observe({
@@ -132,9 +133,9 @@ mod_contenido_whats_server <- function(id){
 
     output$tabla <- renderDT(server = FALSE, {
       validate(need(nrow(base() > 0), message = "En este día no se escucharon diálogos. Intenta con una nueva fecha"))
-
       base() |>
-        distinct(nombre, dia, nivel, unidad = nombre_nivel, resumen) |>
+        distinct(nombre, resumen, .keep_all = T) |>
+        select(nombre, dia, nivel, unidad = nombre_nivel, resumen) |>
         mutate(dia = format(dia, "%d de %B"),
                nivel = stringr::str_to_sentence(nivel)) |>
         rename_all(toupper) |>
