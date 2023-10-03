@@ -90,7 +90,6 @@ mod_contenido_whats_server <- function(id){
       validate(need((input$nivel != "" & nrow(base()) > 0), message = "En este día no se escucharon diálogos. Intenta con una nueva fecha"))
       temp <- case_when(input$nivel == "distrito" ~ "nombre_distrito",
                         T ~ input$nivel)
-
       a <- base() |>
         distinct(unidad, mensajes) |>
         mutate(mensajes = as.numeric(mensajes)) |>

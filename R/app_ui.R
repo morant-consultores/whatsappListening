@@ -12,8 +12,8 @@ app_ui <- function(request) {
     # Your application UI logic
     dashboardPage(
       header = dashboardHeader(title = "Gestión whatsapp Chiapas"),
-      sidebar = dashboardSidebar(#expand_on_hover = F,
-        # Sidebar #####
+      sidebar = dashboardSidebar(
+        disable = T,
         sidebarMenu(
           # menuItem("Solicitudes",
           #          tabName = "solicitudes",
