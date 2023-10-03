@@ -87,6 +87,7 @@ mod_contenido_whats_server <- function(id){
     })
 
     output$mapa <- renderLeaflet({
+      req(input$nivel != "" & nrow(base()) > 0)
       validate(need((input$nivel != "" & nrow(base()) > 0), message = "En este día no se escucharon diálogos. Intenta con una nueva fecha"))
       temp <- case_when(input$nivel == "distrito" ~ "nombre_distrito",
                         T ~ input$nivel)
