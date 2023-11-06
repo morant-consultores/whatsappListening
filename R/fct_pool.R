@@ -13,7 +13,7 @@ pool <- pool::dbPool(
   Database = "DIRECTORIO",
   Server = "tcp:morant.database.windows.net",
   UID = "emorones",
-  PWD = "Presidevis-Emi",
+  PWD = "Mor@nt2024",
   Port = 1433,
   timeout = 120
 )
