@@ -12,7 +12,7 @@ morena <- "#E81D1D"
 complemento <- "#1DE8B5"
 
 mi_tema <- fresh::create_theme(
-  adminlte_color(
+  fresh::adminlte_color(
     light_blue = "#4898a8"
   )
 )

@@ -52,10 +52,10 @@ mod_analisis_whats_ui <- function(id){
                              gt::gt_output(ns("top"))
                            )
                          )
-                ),
-                tabPanel("Contenido",
-                         mod_contenido_whats_ui(ns("contenido_whats_1"))
-                         )
+                )#,
+                # tabPanel("Contenido",
+                #          mod_contenido_whats_ui(ns("contenido_whats_1"))
+                #          )
     )
   )
 }
@@ -67,7 +67,7 @@ mod_analisis_whats_server <- function(id, bd){
   moduleServer( id, function(input, output, session){
     ns <- session$ns
 
-    mod_contenido_whats_server("contenido_whats_1")
+    # mod_contenido_whats_server("contenido_whats_1")
 
     # grupos <- reactive({
     #   clave |>
